@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Appointment App</title>
+</head>
+<body>
+    <h1>Booking Appointment App</h1>
+    <form id="registrationForm" method="post" action="/admin">
+        <div>
+            <label for="username">User Name</label>
+            <input type="text" id="username" name="username" required>
+        </div><br>
+        <div>
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" required>
+        </div><br>
+        <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div><br>
+        <div>
+            <input type="submit" value="Book Appointment">
+        </div>
+    </form>
+    <h2>All Appointments</h2>
+    <ul id="userList"></ul>
+    <script>
+         document.addEventListener('DOMContentLoaded', fetchUsers);
+        async function fetchUsers() {
+            const response = await fetch('/users');
+            const users = await response.json();
+
+            const userList = document.getElementById('userList');
+            userList.innerHTML = ''; 
+
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.innerHTML = `${user.User_name} - ${user.phone_no} - ${user.email} 
+                    <button onclick="deleteUser(${user.id})">Delete</button>`;
+                userList.appendChild(li);
+            });
+        }
+
+
+
+
+        document.getElementById('registrationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();  
+            //console.log(document.getElementById('username').value);
+            const formData = {
+                username: document.getElementById('username').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value
+            };
+            
+
+            const response = await fetch('/admin', {
+                
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            //console.log(formData)
+            if (response.ok) {
+                window.location.reload();
+                alert('User registered successfully!');
+            } else {
+                alert('Error registering user.');
+            }
+        });
+
+        async function deleteUser(userId) {
+            const response = await fetch(`/users/${userId}`, { method: 'DELETE' });
+            if (response.ok) {
+                alert('User deleted successfully!');
+                fetchUsers();  // Reload the updated user list
+            } else {
+                alert('Error deleting user.');
+            }
+        }
+
+    </script>
+</body>
+</html>
